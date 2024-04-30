@@ -2,6 +2,9 @@ import mysql.connector
 import tkinter as tk
 root = tk.Tk()
 
+root = tk.Tk()
+root.title("Welcome to WorldBank")
+
 conn = mysql.connector.connect(
     host="localhost",
     database="banking",
