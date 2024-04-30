@@ -1,11 +1,12 @@
 import mysql.connector
 import tkinter as tk
+root = tk.Tk()
 
 conn = mysql.connector.connect(
     host="localhost",
     database="banking",
     user="root",
-    password="eyerusekifle0317")
+    password="eyerusekifle0317" )
 
 class BankAccount:
     def __init__(self, name, acc_num, password, balance=0):
@@ -17,7 +18,6 @@ class BankAccount:
     def deposit(self, amount):
         if amount > 0:
             self.balance += amount
-            self.update_balance()
             print(f"Deposited ${amount}. Current balance: ${self.balance}")
         else:
             print("Invalid deposit amount.")
@@ -25,7 +25,6 @@ class BankAccount:
     def withdraw(self, amount):
         if 0 < amount <= self.balance:
             self.balance -= amount
-            self.update_balance()
             print(f"Withdrew ${amount}. Current balance: ${self.balance}")
         else:
             print("Insufficient funds.")
@@ -33,14 +32,12 @@ class BankAccount:
     def get_balance(self):
         print(f"Balance for {self.name}: ${self.balance}")
 
-    def update_balance(self):
-        cursor = conn.cursor()
-        sql = "UPDATE accounts SET balance = %s WHERE acc_num = %s"
-        val = (self.balance, self.acc_num)
-        cursor.execute(sql, val)
-        conn.commit()
-
-def create_account(name, acc_num, password, balance):
+def create_account():
+    print("Welcome to WORLDBANK!")
+    name = input("Name: ")
+    acc_num = input("Account Number: ")
+    password = input("Password: ")
+    balance = input('Initial Balance: ')
     cursor = conn.cursor()
     sql = "INSERT INTO accounts (name, acc_num, password, balance) VALUES (%s, %s, %s, %s)"
     val = (name, acc_num, password, balance)
@@ -48,37 +45,34 @@ def create_account(name, acc_num, password, balance):
     conn.commit()
     print("Account created successfully!")
 
-def main_window():
-    root = tk.Tk()
-    root.title("WorldBank")
-    
+
+def main():
     label = tk.Label(root, text="Welcome to WorldBank!")
     label.pack()
+    name = input("Name: ")
+    acc_num = input("Account Number: ")
+    password = input("Password: ")
+    account = BankAccount(name, acc_num, password)
+    while True:
+        print("\n1. Create Account\n2. Deposit\n3. Withdraw\n4. Check Balance\n5. Exit")
+        choice = input("Enter your choice: ")
+        if choice == '1':
+          create_account()
+        elif choice == '2':
+            amount = float(input("Enter amount to deposit: "))
+            account.deposit(amount)
+        elif choice == '3':
+            amount = float(input("Enter amount to withdraw: "))
+            account.withdraw(amount)
+        elif choice == '4':
+            account.get_balance()
+        elif choice == '5':
+            print("Thank you for using the Banking System. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please enter a valid option.")
 
-    name_label = tk.Label(root, text="Name:")
-    name_label.pack()
-    name_entry = tk.Entry(root)
-    name_entry.pack()
 
-    acc_num_label = tk.Label(root, text="Account Number:")
-    acc_num_label.pack()
-    acc_num_entry = tk.Entry(root)
-    acc_num_entry.pack()
-
-    password_label = tk.Label(root, text="Password:")
-    password_label.pack()
-    password_entry = tk.Entry(root, show="*")
-    password_entry.pack()
-
-    balance_label = tk.Label(root, text="Initial Balance:")
-    balance_label.pack()
-    balance_entry = tk.Entry(root)
-    balance_entry.pack()
-
-    create_button = tk.Button(root, text="Create Account", command=lambda: create_account(name_entry.get(), acc_num_entry.get(), password_entry.get(), balance_entry.get()))
-    create_button.pack()
-
-    root.mainloop()
 
 if __name__ == "__main__":
-    main_window()
+    main()
