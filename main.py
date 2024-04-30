@@ -1,96 +1,84 @@
+import mysql.connector
 import tkinter as tk
 
-class BankingApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("World Bank")
+conn = mysql.connector.connect(
+    host="localhost",
+    database="banking",
+    user="root",
+    password="eyerusekifle0317")
 
-        self.accounts = {}
+class BankAccount:
+    def __init__(self, name, acc_num, password, balance=0):
+        self.name = name
+        self.acc_num = acc_num
+        self.password = password
+        self.balance = balance
 
-        # Create GUI elements
-        self.label_name = tk.Label(root, text="Account Name:")
-        self.label_name.grid(row=0, column=0, padx=5, pady=5)
-        self.entry_name = tk.Entry(root)
-        self.entry_name.grid(row=0, column=1, padx=5, pady=5)
+    def deposit(self, amount):
+        if amount > 0:
+            self.balance += amount
+            self.update_balance()
+            print(f"Deposited ${amount}. Current balance: ${self.balance}")
+        else:
+            print("Invalid deposit amount.")
 
-        self.label_balance = tk.Label(root, text="Initial Balance:")
-        self.label_balance.grid(row=1, column=0, padx=5, pady=5)
-        self.entry_balance = tk.Entry(root)
-        self.entry_balance.grid(row=1, column=1, padx=5, pady=5)
+    def withdraw(self, amount):
+        if 0 < amount <= self.balance:
+            self.balance -= amount
+            self.update_balance()
+            print(f"Withdrew ${amount}. Current balance: ${self.balance}")
+        else:
+            print("Insufficient funds.")
 
-        self.button_create = tk.Button(root, text="Create Account", command=self.create_account)
-        self.button_create.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
+    def get_balance(self):
+        print(f"Balance for {self.name}: ${self.balance}")
 
-        self.label_action = tk.Label(root, text="Action:")
-        self.label_action.grid(row=3, column=0, padx=5, pady=5)
-        self.action_var = tk.StringVar(root)
-        self.action_var.set("Deposit")
-        self.action_menu = tk.OptionMenu(root, self.action_var, "Deposit", "Withdraw", "Check Balance")
-        self.action_menu.grid(row=3, column=1, padx=5, pady=5)
+    def update_balance(self):
+        cursor = conn.cursor()
+        sql = "UPDATE accounts SET balance = %s WHERE acc_num = %s"
+        val = (self.balance, self.acc_num)
+        cursor.execute(sql, val)
+        conn.commit()
 
-        self.label_amount = tk.Label(root, text="Amount:")
-        self.label_amount.grid(row=4, column=0, padx=5, pady=5)
-        self.entry_amount = tk.Entry(root)
-        self.entry_amount.grid(row=4, column=1, padx=5, pady=5)
+def create_account(name, acc_num, password, balance):
+    cursor = conn.cursor()
+    sql = "INSERT INTO accounts (name, acc_num, password, balance) VALUES (%s, %s, %s, %s)"
+    val = (name, acc_num, password, balance)
+    cursor.execute(sql, val)
+    conn.commit()
+    print("Account created successfully!")
 
-        self.button_submit = tk.Button(root, text="Submit", command=self.perform_action)
-        self.button_submit.grid(row=5, column=0, columnspan=2, padx=5, pady=5)
-
-        self.output_text = tk.Text(root, height=10, width=40)
-        self.output_text.grid(row=6, column=0, columnspan=2, padx=5, pady=5)
-
-    def create_account(self):
-        name = self.entry_name.get()
-        balance = float(self.entry_balance.get())
-        if name in self.accounts:
-            self.output_text.insert(tk.END, "Account already exists.\n")
-            return
-        if balance < 0:
-            self.output_text.insert(tk.END, "Initial balance must be non-negative.\n")
-            return
-        self.accounts[name] = balance
-        self.output_text.insert(tk.END, f"Account created for {name} with initial balance ${balance:.2f}\n")
-
-    def perform_action(self):
-        name = self.entry_name.get()
-        action = self.action_var.get()
-        amount = float(self.entry_amount.get())
-
-        if action == "Deposit":
-            if name not in self.accounts:
-                self.output_text.insert(tk.END, "Account does not exist.\n")
-                return
-            if amount <= 0:
-                self.output_text.insert(tk.END, "Deposit amount must be positive.\n")
-                return
-            self.accounts[name] += amount
-            self.output_text.insert(tk.END, f"${amount:.2f} deposited into {name} account. New balance: ${self.accounts[name]:.2f}\n")
-
-        elif action == "Withdraw":
-            if name not in self.accounts:
-                self.output_text.insert(tk.END, "Account does not exist.\n")
-                return
-            if amount <= 0:
-                self.output_text.insert(tk.END, "Withdrawal amount must be positive.\n")
-                return
-            if self.accounts[name] < amount:
-                self.output_text.insert(tk.END, "Insufficient funds.\n")
-                return
-            self.accounts[name] -= amount
-            self.output_text.insert(tk.END, f"${amount:.2f} withdrawn from {name} account. New balance: ${self.accounts[name]:.2f}\n")
-
-        elif action == "Check Balance":
-            if name not in self.accounts:
-                self.output_text.insert(tk.END, "Account does not exist.\n")
-                return
-            self.output_text.insert(tk.END, f"Balance for {name} account: ${self.accounts[name]:.2f}\n")
-
-
-def main():
+def main_window():
     root = tk.Tk()
-    app = BankingApp(root)
+    root.title("WorldBank")
+    
+    label = tk.Label(root, text="Welcome to WorldBank!")
+    label.pack()
+
+    name_label = tk.Label(root, text="Name:")
+    name_label.pack()
+    name_entry = tk.Entry(root)
+    name_entry.pack()
+
+    acc_num_label = tk.Label(root, text="Account Number:")
+    acc_num_label.pack()
+    acc_num_entry = tk.Entry(root)
+    acc_num_entry.pack()
+
+    password_label = tk.Label(root, text="Password:")
+    password_label.pack()
+    password_entry = tk.Entry(root, show="*")
+    password_entry.pack()
+
+    balance_label = tk.Label(root, text="Initial Balance:")
+    balance_label.pack()
+    balance_entry = tk.Entry(root)
+    balance_entry.pack()
+
+    create_button = tk.Button(root, text="Create Account", command=lambda: create_account(name_entry.get(), acc_num_entry.get(), password_entry.get(), balance_entry.get()))
+    create_button.pack()
+
     root.mainloop()
 
-
 if __name__ == "__main__":
-    main()
+    main_window()
