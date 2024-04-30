@@ -56,7 +56,8 @@ def main():
     name = input("Name: ")
     acc_num = input("Account Number: ")
     password = input("Password: ")
-    account = BankAccount(name, acc_num, password)
+    balance = input("Initial Balance: ")
+    account = BankAccount(name, acc_num, password, balance)
     while True:
         print("\n1. Create Account\n2. Deposit\n3. Withdraw\n4. Check Balance\n5. Exit")
         choice = input("Enter your choice: ")
@@ -81,3 +82,18 @@ def main():
 # Test code
 if __name__ == "__main__":
     main()
+
+    # Create a bank account
+    create_account()
+
+    # test account and initial deposit
+    account = BankAccount("John Doe", "123456789", "password123", 1000)
+
+    # Deposit
+    account.deposit(500)
+
+    # Withdraw
+    account.withdraw(200)
+
+    # Check balance
+    account.get_balance()
