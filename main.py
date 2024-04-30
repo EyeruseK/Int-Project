@@ -2,6 +2,7 @@ import mysql.connector
 import tkinter as tk
 root = tk.Tk()
 
+#tkinter:
 root = tk.Tk()
 root.title("Welcome to WorldBank")
 
@@ -77,5 +78,6 @@ def main():
 
 
 
+# Test code
 if __name__ == "__main__":
     main()
